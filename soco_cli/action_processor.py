@@ -10,6 +10,7 @@ import time
 from collections import OrderedDict
 from datetime import datetime, timedelta
 from os import get_terminal_size
+from pathlib import Path
 from random import randint
 
 import soco  # type: ignore
@@ -20,7 +21,8 @@ from xmltodict import parse  # type: ignore
 
 from soco_cli import alarms
 from soco_cli.play_local_file import play_local_file
-from soco_cli.play_local_file_lists import play_directory_files, play_m3u_file
+from soco_cli.play_local_file_lists import play_directory_files, play_m3u_file, play_file_list
+from soco_cli.rj_tts import create_tts_file
 from soco_cli.speaker_info import print_speaker_table
 from soco_cli.utils import (
     convert_to_seconds,
@@ -2766,6 +2768,53 @@ def process_wait_action(speaker, action, args, soco_function, use_local_speaker_
     return True
 
 
+@one_or_more_parameters
+def speak_text(speaker, action, args, soco_function, use_local_speaker_list):
+    """
+    Convert text to speech and play it on the speaker.
+
+    Args:
+        speaker (SoCo): The speaker object to play the text.
+        action (str): The action to be performed, - not used.
+        args (list): The arguments for the action. The first argument is the text to be converted to speech.
+                     The second argument (optional) is the filename for the TTS file.
+        soco_function (str): The SoCo function to be used, - not used.
+        use_local_speaker_list (bool): Whether to use the local speaker list.
+
+    Returns:
+        bool: True if the text was successfully converted to speech and played, False otherwise.
+    """
+    if not args:
+        return False
+
+    text = args[0]
+    tts_file_name = args[1] if len(args) > 1 else "text.mp3"
+
+    debug = True  # TODO Enable this after test: "debug".lower() in (arg.lower() for arg in args)
+
+    tts_path = Path(tts_file_name)
+
+    # Create the TTS file:
+    try:
+        create_tts_file(text, tts_path)
+    except Exception as e:
+        error_report(f"Failed to create TTS file: {tts_path}: {e}")
+        return False
+
+    if not debug:
+        # Play the TTS file:
+        try:
+            play_result = play_file(speaker, 'play_file', (tts_file_name,), soco_function, use_local_speaker_list)
+        except Exception as e:
+            error_report(f"Failed to play TTS file: {tts_path}: {e}")
+            play_result = False
+
+        return play_result
+    else:
+        error_report(f"For debugging purpose only a TTS file was created: {tts_path.absolute()}")
+        return True
+
+
 def process_action(speaker, action, args, use_local_speaker_list=False) -> bool:
     sonos_function = actions.get(action, None)
     if sonos_function:
@@ -3204,4 +3253,7 @@ actions = {
     "stop_all": SonosFunction(operate_on_all, "stop", False),
     "set_queue_position": SonosFunction(set_queue_position, "", True),
     "sqp": SonosFunction(set_queue_position, "", True),
+
+    "speak": SonosFunction(speak_text, "", True),
+    "speak_text": SonosFunction(speak_text, "", True),
 }
