@@ -3,8 +3,8 @@
     build-backend = "setuptools.build_meta"
 
 [project]
-    name = "soco-cli"
-    description = "Sonos command line control utility, based on SoCo"
+    name = "rj-soco-cli"
+    description = "Sonos command line control utility, based on SoCo. Speak command added by RJ"
     classifiers = [
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: Apache Software License",

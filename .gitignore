@@ -13,3 +13,5 @@ __pycache__/
 /examples
 /.mypy_cache
 /.pytest_cache
+soco_cli/tts_text.mp3
+rj_soco_cli.egg-info/

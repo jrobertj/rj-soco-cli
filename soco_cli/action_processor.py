@@ -22,7 +22,7 @@ from xmltodict import parse  # type: ignore
 from soco_cli import alarms
 from soco_cli.play_local_file import play_local_file
 from soco_cli.play_local_file_lists import play_directory_files, play_m3u_file, play_file_list
-from soco_cli.rj_tts import create_tts_file
+from soco_cli.rj_tts import create_tts_file, play_mp3_file
 from soco_cli.speaker_info import print_speaker_table
 from soco_cli.utils import (
     convert_to_seconds,
@@ -2790,7 +2790,7 @@ def speak_text(speaker, action, args, soco_function, use_local_speaker_list):
     text = args[0]
     tts_file_name = args[1] if len(args) > 1 else "text.mp3"
 
-    debug = True  # TODO Enable this after test: "debug".lower() in (arg.lower() for arg in args)
+    debug = "debug".lower() in (arg.lower() for arg in args)
 
     tts_path = Path(tts_file_name)
 
@@ -2801,7 +2801,11 @@ def speak_text(speaker, action, args, soco_function, use_local_speaker_list):
         error_report(f"Failed to create TTS file: {tts_path}: {e}")
         return False
 
-    if not debug:
+    if debug:
+        play_mp3_file(tts_path)
+        error_report(f"A TTS file was created {tts_path.absolute()}, but only played locally.")
+        return True
+    else:
         # Play the TTS file:
         try:
             play_result = play_file(speaker, 'play_file', (tts_file_name,), soco_function, use_local_speaker_list)
@@ -2810,9 +2814,6 @@ def speak_text(speaker, action, args, soco_function, use_local_speaker_list):
             play_result = False
 
         return play_result
-    else:
-        error_report(f"For debugging purpose only a TTS file was created: {tts_path.absolute()}")
-        return True
 
 
 def process_action(speaker, action, args, use_local_speaker_list=False) -> bool:
