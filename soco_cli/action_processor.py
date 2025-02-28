@@ -3255,6 +3255,7 @@ actions = {
     "set_queue_position": SonosFunction(set_queue_position, "", True),
     "sqp": SonosFunction(set_queue_position, "", True),
 
+    "say": SonosFunction(speak_text, "", True),
     "speak": SonosFunction(speak_text, "", True),
     "speak_text": SonosFunction(speak_text, "", True),
 }
