@@ -16,3 +16,4 @@ __pycache__/
 soco_cli/tts_text.mp3
 rj_soco_cli.egg-info/
 soco_cli/bongo.mp3
+speak_text.mp3

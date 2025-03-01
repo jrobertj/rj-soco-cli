@@ -65,6 +65,14 @@ def error_report(msg):
         os._exit(1)
 
 
+def info_report(msg):
+    # Print to stdout
+    print("Info:", msg, flush=True)
+
+    # Log the info message
+    logging.info(msg)
+
+
 def parameter_type_error(action, required_params):
     msg = "Action '{}' takes parameter(s): {}".format(action, required_params)
     error_report(msg)

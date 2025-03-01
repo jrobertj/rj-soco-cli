@@ -51,7 +51,7 @@ from soco_cli.utils import (
     unsub_all_remembered_event_subs,
     zero_one_or_two_parameters,
     zero_or_one_parameter,
-    zero_parameters,
+    zero_parameters, info_report,
 )
 from soco_cli.wait_actions import process_wait
 
@@ -2814,7 +2814,7 @@ def speak_text(speaker, action, args, soco_function, use_local_speaker_list):
     if debug and (os.name == 'nt'):
         # Only play the TTS file locally on Windows for test/debugging:
         soco_cli.rj_tts.play_mp3_file(tts_path)
-        error_report(f"A TTS file was created {tts_path.absolute()}, but only played locally for test/debugging")
+        info_report(f"A TTS file was created: {tts_path.absolute()}, - but only played locally for test/debugging")
         return True
     else:
         # Play the TTS file on the Sonos speakers:
