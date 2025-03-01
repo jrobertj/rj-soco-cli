@@ -5,6 +5,7 @@ and needs to be converted to a Class.
 """
 
 import logging
+import os
 import pprint
 import time
 from collections import OrderedDict
@@ -19,10 +20,11 @@ from soco.exceptions import NotSupportedException, SoCoUPnPException  # type: ig
 from soco.plugins.sharelink import ShareLinkPlugin  # type: ignore
 from xmltodict import parse  # type: ignore
 
+import soco_cli.rj_tts
 from soco_cli import alarms
 from soco_cli.play_local_file import play_local_file
 from soco_cli.play_local_file_lists import play_directory_files, play_m3u_file, play_file_list
-from soco_cli.rj_tts import create_tts_file, play_mp3_file
+from soco_cli.rj_tts import create_tts_file
 from soco_cli.speaker_info import print_speaker_table
 from soco_cli.utils import (
     convert_to_seconds,
@@ -2809,9 +2811,9 @@ def speak_text(speaker, action, args, soco_function, use_local_speaker_list):
         return False
 
     # Play the TTS file:
-    if debug:
-        # Only play the TTS file locally:
-        play_mp3_file(tts_path)
+    if debug and (os.name == 'nt'):
+        # Only play the TTS file locally on Windows for test/debugging:
+        soco_cli.rj_tts.play_mp3_file(tts_path)
         error_report(f"A TTS file was created {tts_path.absolute()}, but only played locally for test/debugging")
         return True
     else:

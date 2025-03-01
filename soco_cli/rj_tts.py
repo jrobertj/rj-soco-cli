@@ -5,9 +5,6 @@ from gtts import gTTS
 
 from soco_cli.utils import error_report
 
-os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "1"
-import pygame
-
 
 def create_tts_file(text: str, tts_file_path: Path=Path("tts.mp3"), lang='no'):
     """
@@ -81,20 +78,25 @@ def create_tts_file_cloud(text: str, tts_file_path: Path = Path("tts.mp3"), lang
         out.write(response.audio_content)
 
 
-def play_mp3_file(file_path: Path):
-    """Plays a mp3 file on the local host using pygame."""
-    if file_path.exists():
-        try:
-            pygame.mixer.init()
-            pygame.mixer.music.load(file_path)
-            pygame.mixer.music.play()
-            while pygame.mixer.music.get_busy():
-                pygame.time.Clock().tick(10) #keep program running while music plays.
-            pygame.mixer.quit()
+if os.name == 'nt':  # Check if the operating system is Windows
+    os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "1"
+    import pygame
+    from soco_cli.utils import error_report
 
-        except pygame.error as e:
-            error_report(f"Error playing MP3: {e}")
-        except Exception as e:
-            error_report(f"General Error playing MP3: {e}")
-    else:
-        error_report(f"File not found: {file_path}")
+    def play_mp3_file(file_path: Path):
+        """Plays a mp3 file on the local host using pygame."""
+        if file_path.exists():
+            try:
+                pygame.mixer.init()
+                pygame.mixer.music.load(file_path)
+                pygame.mixer.music.play()
+                while pygame.mixer.music.get_busy():
+                    pygame.time.Clock().tick(10)  # keep program running while music plays.
+                pygame.mixer.quit()
+
+            except pygame.error as e:
+                error_report(f"Error playing MP3: {e}")
+            except Exception as e:
+                error_report(f"General Error playing MP3: {e}")
+        else:
+            error_report(f"File not found: {file_path}")
