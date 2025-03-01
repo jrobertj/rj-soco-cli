@@ -82,7 +82,7 @@ def create_tts_file_cloud(text: str, tts_file_path: Path = Path("tts.mp3"), lang
 
 
 def play_mp3_file(file_path: Path):
-    """Plays an MP3 file using pygame."""
+    """Plays a mp3 file on the local host using pygame."""
     if file_path.exists():
         try:
             pygame.mixer.init()

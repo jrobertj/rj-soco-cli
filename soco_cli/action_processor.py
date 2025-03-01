@@ -2784,15 +2784,22 @@ def speak_text(speaker, action, args, soco_function, use_local_speaker_list):
     Returns:
         bool: True if the text was successfully converted to speech and played, False otherwise.
     """
+
     if not args:
         return False
 
+    # Extract "debug" from args if present
+    debug = False
+    new_args = []
+    for arg in args:
+        if arg.lower() == "debug":
+            debug = True
+        else:
+            new_args.append(arg)
+    args = new_args
+
     text = args[0]
-    tts_file_name = args[1] if len(args) > 1 else "text.mp3"
-
-    debug = "debug".lower() in (arg.lower() for arg in args)
-
-    tts_path = Path(tts_file_name)
+    tts_path = Path(args[1] if len(args) > 1 else "speak_text.mp3")
 
     # Create the TTS file:
     try:
@@ -2801,18 +2808,19 @@ def speak_text(speaker, action, args, soco_function, use_local_speaker_list):
         error_report(f"Failed to create TTS file: {tts_path}: {e}")
         return False
 
+    # Play the TTS file:
     if debug:
+        # Only play the TTS file locally:
         play_mp3_file(tts_path)
-        error_report(f"A TTS file was created {tts_path.absolute()}, but only played locally.")
+        error_report(f"A TTS file was created {tts_path.absolute()}, but only played locally for test/debugging")
         return True
     else:
-        # Play the TTS file:
+        # Play the TTS file on the Sonos speakers:
         try:
-            play_result = play_file(speaker, 'play_file', (tts_file_name,), soco_function, use_local_speaker_list)
+            play_result = play_file(speaker, 'play_file', (str(tts_path.absolute()),), soco_function, use_local_speaker_list)
         except Exception as e:
             error_report(f"Failed to play TTS file: {tts_path}: {e}")
             play_result = False
-
         return play_result
 
 
@@ -3257,5 +3265,4 @@ actions = {
 
     "say": SonosFunction(speak_text, "", True),
     "speak": SonosFunction(speak_text, "", True),
-    "speak_text": SonosFunction(speak_text, "", True),
 }
