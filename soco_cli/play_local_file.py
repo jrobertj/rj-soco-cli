@@ -273,7 +273,13 @@ def play_local_file(speaker: SoCo, pathname: str, end_on_pause: bool = False) ->
     # This ensures that other running invocations of 'play_file'
     # receive their stop events, and terminate.
     logging.info("Stopping speaker '{}'".format(speaker.player_name))
-    speaker.stop()
+    try:
+        speaker.stop()
+    except Exception as e:
+        if speaker.is_playing_tv:
+            logging.warning(f"Failed to stop speaker while TV is playing {e}")
+        else:
+            error_report(f"Failed to stop speaker {e}")
 
     # Assemble the URI
     uri = "http://" + server_ip + ":" + str(httpd.server_port) + "/" + url_filename
