@@ -711,7 +711,7 @@ def _load_macros(macros: dict, filename: str) -> bool:
     # Create the 'generic' macro
     macros["__"] = "%1 %2 %3 %4 %5 %6 %7 %8 %9 %10 %11 %12"
     try:
-        with open(filename, "r") as f:
+        with open(filename, "r", encoding="utf-8") as f:
             line = f.readline()
             while line != "":
                 if not line.startswith("#") and line != "\n":
