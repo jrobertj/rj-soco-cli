@@ -13,7 +13,6 @@ __pycache__/
 /examples
 /.mypy_cache
 /.pytest_cache
-soco_cli/tts_text.mp3
 rj_soco_cli.egg-info/
-soco_cli/bongo.mp3
-speak_text.mp3
+soco_cli/*.mp3
+*.mp3
