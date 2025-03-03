@@ -5,26 +5,25 @@ and needs to be converted to a Class.
 """
 
 import logging
-import os
 import pprint
 import time
 from collections import OrderedDict
 from datetime import datetime, timedelta
 from os import get_terminal_size
-from pathlib import Path
 from random import randint
 
 import soco  # type: ignore
 import tabulate  # type: ignore
 from soco.exceptions import NotSupportedException, SoCoUPnPException  # type: ignore
 from soco.plugins.sharelink import ShareLinkPlugin  # type: ignore
+
 from xmltodict import parse  # type: ignore
 
-import soco_cli.rj_tts
+from soco_cli.rj_alert import alert_file
+
 from soco_cli import alarms
 from soco_cli.play_local_file import play_local_file
-from soco_cli.play_local_file_lists import play_directory_files, play_m3u_file, play_file_list
-from soco_cli.rj_tts import create_tts_file
+from soco_cli.play_local_file_lists import play_directory_files, play_m3u_file
 from soco_cli.speaker_info import print_speaker_table
 from soco_cli.utils import (
     convert_to_seconds,
@@ -51,7 +50,7 @@ from soco_cli.utils import (
     unsub_all_remembered_event_subs,
     zero_one_or_two_parameters,
     zero_or_one_parameter,
-    zero_parameters, info_report,
+    zero_parameters,
 )
 from soco_cli.wait_actions import process_wait
 
@@ -2770,62 +2769,6 @@ def process_wait_action(speaker, action, args, soco_function, use_local_speaker_
     return True
 
 
-@one_or_more_parameters
-def speak_text(speaker, action, args, soco_function, use_local_speaker_list):
-    """
-    Convert text to speech and play it on the speaker.
-
-    Args:
-        speaker (SoCo): The speaker object to play the text.
-        action (str): The action to be performed, - not used.
-        args (list): The arguments for the action. The first argument is the text to be converted to speech.
-                     The second argument (optional) is the filename for the TTS file.
-        soco_function (str): The SoCo function to be used, - not used.
-        use_local_speaker_list (bool): Whether to use the local speaker list.
-
-    Returns:
-        bool: True if the text was successfully converted to speech and played, False otherwise.
-    """
-
-    if not args:
-        return False
-
-    # Extract "debug" from args if present
-    debug = False
-    new_args = []
-    for arg in args:
-        if arg.lower() == "debug":
-            debug = True
-        else:
-            new_args.append(arg)
-    args = new_args
-
-    text = args[0]
-    tts_path = Path(args[1] if len(args) > 1 else "speak_text.mp3")
-
-    # Create the TTS file:
-    try:
-        create_tts_file(text, tts_path)
-    except Exception as e:
-        error_report(f"Failed to create TTS file: {tts_path}: {e}")
-        return False
-
-    # Play the TTS file:
-    if debug and (os.name == 'nt'):
-        # Only play the TTS file locally on Windows for test/debugging:
-        soco_cli.rj_tts.play_mp3_file(tts_path)
-        info_report(f"A TTS file was created: {tts_path.absolute()}, - but only played locally for test/debugging")
-        return True
-    else:
-        # Play the TTS file on the Sonos speakers:
-        try:
-            play_result = play_file(speaker, 'play_file', (str(tts_path.absolute()),), soco_function, use_local_speaker_list)
-        except Exception as e:
-            error_report(f"Failed to play TTS file: {tts_path}: {e}")
-            play_result = False
-        return play_result
-
-
 def process_action(speaker, action, args, use_local_speaker_list=False) -> bool:
     sonos_function = actions.get(action, None)
     if sonos_function:
@@ -3265,6 +3208,5 @@ actions = {
     "set_queue_position": SonosFunction(set_queue_position, "", True),
     "sqp": SonosFunction(set_queue_position, "", True),
 
-    "say": SonosFunction(speak_text, "", True),
-    "speak": SonosFunction(speak_text, "", True),
+    "alert": SonosFunction(alert_file, "", True),
 }
